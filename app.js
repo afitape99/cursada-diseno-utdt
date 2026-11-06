@@ -652,7 +652,7 @@ function chip(text, kind, i) {
 }
 function openJoin() {
   joinDebe = []; joinOpts = [];
-  $("jName").value = ""; $("jCuatri").value = "3"; $("jCM").value = "0"; $("jAway").value = ""; $("jSit").value = ""; $("jOpt").value = "";
+  $("jName").value = ""; $("jCuatri").value = "3"; $("jCM").value = "0"; $("jAway").value = ""; $("jOpt").value = "";
   fillDebeSelect(); renderChips();
   joinDlg.showModal();
   $("jName").focus();
@@ -692,7 +692,7 @@ $("joinForm").addEventListener("submit", ev => {
     ...optBlocks(joinOpts.length ? joinOpts : placeholderOpts(cmDone), cmDone)
   ];
   const id = store.newId();
-  const person = { name, cuatri: year, cmDone, afuera: $("jAway").value, situacion: $("jSit").value.trim().slice(0, 300), ownerUid: store.uid, createdAt: Date.now() };
+  const person = { name, cuatri: year, cmDone, afuera: $("jAway").value, situacion: "", ownerUid: store.uid, createdAt: Date.now() };
   joinDlg.close();
   meId = id;
   try { localStorage.setItem("cursada-me", id); } catch (e) { /* nada */ }
