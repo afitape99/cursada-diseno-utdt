@@ -389,22 +389,6 @@ function render() {
     if (focusId === "quickName") f.setSelectionRange(f.value.length, f.value.length);
   }
 
-  const foot = el("div", "foot");
-  foot.appendChild(el("div", "jl lead"));
-  const tl = el("div", "jl"); tl.appendChild(el("b", null, "Cursan juntos")); foot.appendChild(tl);
-  for (const c of COLS.filter(c => c.term)) {
-    const box = el("div", "jl"), ul = el("ul");
-    Object.values(share).filter(s => s.col === c.id && s.ps.length > 1)
-      .sort((a, b) => b.ps.length - a.ps.length)
-      .forEach(s => {
-        const li = el("li"); li.appendChild(el("strong", null, s.name));
-        li.appendChild(document.createTextNode(" · " + s.ps.join(", ")));
-        ul.appendChild(li);
-      });
-    if (!ul.children.length) ul.appendChild(el("li", null, "Ninguna"));
-    box.appendChild(ul); foot.appendChild(box);
-  }
-  boardEl.appendChild(foot);
 }
 
 // ---------- Acciones ----------
