@@ -270,7 +270,7 @@ function render() {
     if (p.situacion) who.appendChild(el("span", "sit", p.situacion));
     if (edit) {
       const acts = el("div", "acts");
-      for (const [act, txt] of [["subj", "+ materia"], ["edit", "Mis datos"], ["del", "Borrar"]]) {
+      for (const [act, txt] of [["subj", "+ materia"], ["edit", "Mis datos"], ["del", "Eliminarme"]]) {
         const b = el("button", null, txt); b.type = "button"; b.dataset.pact = act;
         acts.appendChild(b);
       }
@@ -630,6 +630,7 @@ function openPerson() {
   personDlg.showModal(); $("pName").focus();
 }
 $("personCancel").addEventListener("click", () => personDlg.close());
+$("personDel").addEventListener("click", () => { personDlg.close(); $("delDlg").showModal(); });
 $("personForm").addEventListener("submit", ev => {
   ev.preventDefault();
   const p = me(); if (!p) return personDlg.close();
