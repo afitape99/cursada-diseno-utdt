@@ -83,23 +83,6 @@ function placeholderOpts(cmDone) {
   return Array.from({ length: Math.max(0, CM_TOTAL - cmDone) }, () => "Optativa a definir");
 }
 
-// las tres que empezaron el tablero (filas sin dueño hasta que cada una las reclama)
-const SEED = [
-  { id: "bale", name: "Bale", cuatri: 3, cmDone: 2, afuera: "",
-    situacion: "Debe Economía, Visualización de la Información, Historia del Diseño Latinoamericano y Marketing.",
-    blocks: [...planBlocks(3), ...optBlocks(placeholderOpts(2), 2),
-      { code: "3623", col: "c1", debe: true }, { code: "2608", col: "c2", debe: true },
-      { code: "4327", col: "c3", debe: true }, { code: "3621", col: "c3", debe: true }] },
-  { id: "dino", name: "Dino", cuatri: 3, cmDone: 1, afuera: "",
-    situacion: "Al día. En el 1C 2027 cursa las de 4º año sin optativa.",
-    blocks: [...planBlocks(3), ...optBlocks(placeholderOpts(1), 1)] },
-  { id: "sofi", name: "Sofi", cuatri: 3, cmDone: 2, afuera: "c1",
-    situacion: "Al día. El 1C 2027 lo cursa de intercambio en otra universidad.",
-    blocks: [{ code: "4631", col: "c1" }, { code: "4632", col: "c1" }, { code: "4634", col: "c1" },
-      { code: "4633", col: "c2" }, { code: "4635", col: "c2" }, { code: "4630", col: "c3" },
-      ...optBlocks(placeholderOpts(2), 2)] }
-];
-
 // ---------- Almacenamiento ----------
 function hasConfig() { return !!(firebaseConfig && firebaseConfig.apiKey && firebaseConfig.projectId); }
 const clean = o => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
@@ -129,17 +112,6 @@ async function firebaseStore() {
       }, onErr);
       return () => { u1(); u2(); };
     },
-    async seedOnce(seed) {
-      const flag = fs.doc(db, "meta", "seed");
-      if ((await fs.getDoc(flag)).exists()) return;
-      const batch = fs.writeBatch(db);
-      for (const p of seed) {
-        batch.set(fs.doc(people, p.id), { name: p.name, cuatri: p.cuatri, cmDone: p.cmDone, situacion: p.situacion, afuera: p.afuera, createdAt: Date.now() });
-        p.blocks.forEach((b, i) => batch.set(fs.doc(blocks, `${p.id}-${i}`), clean({ personId: p.id, ...b })));
-      }
-      batch.set(flag, { seeded: true });
-      await batch.commit();
-    },
     async addPerson(id, person, list) {
       const batch = fs.writeBatch(db);
       batch.set(fs.doc(people, id), person);
@@ -162,7 +134,7 @@ async function firebaseStore() {
 
 // modo prueba: todo queda en este navegador
 function localStore() {
-  const KEY = "cursada-ditella-v2";
+  const KEY = "cursada-ditella-v3";
   let data = { people: {}, blocks: {} };
   try { const s = localStorage.getItem(KEY); if (s) data = JSON.parse(s); } catch (e) { /* sin almacenamiento */ }
   let uid = null;
@@ -179,14 +151,6 @@ function localStore() {
     uid,
     newId: id,
     subscribe(cb) { listener = cb; setTimeout(save, 0); return () => { listener = null; }; },
-    async seedOnce(seed) {
-      if (Object.keys(data.people).length) return;
-      for (const p of seed) {
-        data.people[p.id] = { id: p.id, name: p.name, cuatri: p.cuatri, cmDone: p.cmDone, situacion: p.situacion, afuera: p.afuera, createdAt: Date.now() };
-        p.blocks.forEach((b, i) => { const bid = `${p.id}-${i}`; data.blocks[bid] = { id: bid, personId: p.id, ...b }; });
-      }
-      save();
-    },
     async addPerson(pid, person, list) {
       data.people[pid] = { id: pid, ...person };
       list.forEach(b => { const bid = id(); data.blocks[bid] = clean({ id: bid, personId: pid, ...b }); });
@@ -210,8 +174,6 @@ let people = [], blocks = [], loaded = false;
 let pendingRemote = null;
 let selected = null, dragging = null, editing = null, editKind = "note", editDraft = "";
 let search = "";
-let meId = null;
-try { meId = localStorage.getItem("cursada-me"); } catch (e) { /* sin almacenamiento */ }
 let askedWho = false;
 
 const $ = id => document.getElementById(id);
@@ -232,14 +194,9 @@ const isOpt = b => typeof b.opt === "boolean" ? b.opt : (b.code === "X" || b.cod
 const keyOf = b => b.code === "X" ? "x:" + (b.name || "").trim().toLowerCase() : b.code;
 const personOf = id => people.find(p => p.id === id);
 const owns = p => !!p && !!store && p.ownerUid === store.uid;
-const me = () => { const p = personOf(meId); return owns(p) ? p : null; };
+// tu fila es la que creaste desde este navegador; no se puede elegir otra
+const me = () => people.find(owns) || null;
 const canEdit = pid => { const m = me(); return !!m && m.id === pid; };
-
-function setMe(id) {
-  meId = id;
-  try { if (id) localStorage.setItem("cursada-me", id); else localStorage.removeItem("cursada-me"); } catch (e) { /* nada */ }
-  render();
-}
 
 function fail(e) {
   console.error(e);
@@ -265,7 +222,7 @@ function warningsFor(b, mine, person) {
 function render() {
   const m = me();
   $("meLabel").textContent = m ? "Sos " + m.name : "Estás mirando";
-  $("whoBtn").textContent = m ? "Cambiar de persona" : "¿Quién sos?";
+  $("whoBtn").hidden = !!m;
 
   const visible = people
     .filter(p => !search || p.name.toLowerCase().includes(search))
@@ -580,45 +537,10 @@ $("search").addEventListener("input", ev => { search = ev.target.value.trim().to
 
 // ---------- ¿Quién sos? ----------
 const whoDlg = $("whoDlg");
-function renderWhoList() {
-  const list = $("whoList");
-  list.textContent = "";
-  const sorted = [...people].sort((a, b) => a.name.localeCompare(b.name, "es"));
-  if (!sorted.length) list.appendChild(el("p", "hint", "Todavía no hay nadie anotado."));
-  for (const p of sorted) {
-    const b = el("button", "whoitem");
-    b.type = "button"; b.dataset.pick = p.id;
-    b.style.setProperty("--pc", colorsFor(p.id)[0]);
-    b.appendChild(el("span", "tag", p.name.trim().charAt(0).toUpperCase() || "?"));
-    b.appendChild(el("span", null, p.name));
-    if (p.ownerUid && !owns(p)) b.appendChild(el("small", null, "tomada en otro dispositivo"));
-    else if (owns(p)) b.appendChild(el("small", null, "vos"));
-    list.appendChild(b);
-  }
-}
-function openWho() {
-  $("whoMsg").hidden = true;
-  renderWhoList();
-  if (!whoDlg.open) whoDlg.showModal();
-}
-$("whoBtn").addEventListener("click", openWho);
-$("whoLook").addEventListener("click", () => { whoDlg.close(); setMe(null); });
+function openWho() { if (!me() && !whoDlg.open) whoDlg.showModal(); }
+$("whoBtn").addEventListener("click", () => { if (!me()) openJoin(); });
+$("whoLook").addEventListener("click", () => whoDlg.close());
 $("whoNew").addEventListener("click", () => { whoDlg.close(); openJoin(); });
-$("whoList").addEventListener("click", ev => {
-  const b = ev.target.closest("[data-pick]"); if (!b) return;
-  const p = personOf(b.dataset.pick); if (!p) return;
-  if (owns(p)) { whoDlg.close(); setMe(p.id); return; }
-  if (p.ownerUid) {
-    const msg = $("whoMsg");
-    msg.textContent = `La fila de ${p.name} ya la tomó alguien desde otro dispositivo o navegador. Podés mirarla, pero solo se edita desde ahí.`;
-    msg.hidden = false;
-    return;
-  }
-  // fila sin dueño: la reclamás
-  p.ownerUid = store.uid;
-  whoDlg.close(); setMe(p.id);
-  store.updatePerson(p.id, { ownerUid: store.uid }).catch(fail);
-});
 
 // ---------- Anotarse ----------
 const joinDlg = $("joinDlg");
@@ -679,7 +601,7 @@ joinDlg.addEventListener("click", ev => {
   if (x.dataset.chip === "debe") joinDebe.splice(i, 1); else joinOpts.splice(i, 1);
   fillDebeSelect(); renderChips();
 });
-$("joinCancel").addEventListener("click", () => { joinDlg.close(); openWho(); });
+$("joinCancel").addEventListener("click", () => joinDlg.close());
 $("joinForm").addEventListener("submit", ev => {
   ev.preventDefault();
   const name = $("jName").value.trim().slice(0, 40);
@@ -694,8 +616,7 @@ $("joinForm").addEventListener("submit", ev => {
   const id = store.newId();
   const person = { name, cuatri: year, cmDone, afuera: $("jAway").value, situacion: "", ownerUid: store.uid, createdAt: Date.now() };
   joinDlg.close();
-  meId = id;
-  try { localStorage.setItem("cursada-me", id); } catch (e) { /* nada */ }
+  if (me()) return; // una sola fila por navegador
   search = ""; $("search").value = "";
   store.addPerson(id, person, list).catch(fail);
 });
@@ -759,7 +680,7 @@ $("delForm").addEventListener("submit", ev => {
   const p = me(); delDlg.close(); if (!p) return;
   const ids = blocks.filter(b => b.personId === p.id).map(b => b.id);
   people = people.filter(x => x.id !== p.id); blocks = blocks.filter(b => b.personId !== p.id);
-  setMe(null);
+  render();
   store.deletePerson(p.id, ids).catch(fail);
 });
 
@@ -784,12 +705,11 @@ async function start() {
     people = P; blocks = B; loaded = loaded || fresh;
     if (selected && !blocks.find(b => b.id === selected)) selected = null;
     render();
-    if (whoDlg.open) renderWhoList();
+    if (whoDlg.open && me()) whoDlg.close();
     if (fresh && !askedWho) {
       askedWho = true;
       if (!me()) openWho();
     }
   }, e => { clearTimeout(timer); console.error(e); setStatus("warn", "Se cortó la conexión con la base. Recargá la página."); });
-  store.seedOnce(SEED).catch(e => console.error(e));
 }
 start();

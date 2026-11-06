@@ -21,7 +21,7 @@
     <span class="status" id="status"><i></i><span>Cargando el tablero…</span></span>
     <div class="tools">
       <span class="me" id="meLabel"></span>
-      <button type="button" id="whoBtn">Cambiar de persona</button>
+      <button type="button" class="primary" id="whoBtn">Anotarme</button>
       <input id="search" type="search" placeholder="Buscar persona" aria-label="Buscar persona">
     </div>
   </div>
@@ -29,7 +29,7 @@
   <div class="scroller"><div class="board" id="board"></div></div>
 
   <div class="help">
-    <p><strong>Tu fila:</strong> arrastrá cada materia al cuatrimestre que quieras. También podés tocarla y después tocar el cuatrimestre, o usar las flechas del teclado. Las filas de los demás solo se miran.</p>
+    <p><strong>Tu fila:</strong> arrastrá cada materia al cuatrimestre que quieras. También podés tocarla y después tocar el cuatrimestre, o usar las flechas del teclado. Solo podés editar la fila que creaste, desde el navegador donde te anotaste. Las de los demás solo se miran.</p>
     <p><strong>Materias:</strong> con "+ materia" sumás una del plan o una optativa. Cada materia tiene dos switches: si es optativa y si la debés de años anteriores.</p>
     <p><strong>Recibirse a fin de 2028:</strong> hay que dejar para el 2C 2028 una obligatoria o la última de las 3 optativas.</p>
     <p><strong>Avisos:</strong> el tablero marca materias que no se dictan en ese cuatrimestre y correlativas fuera de orden. El cuatrimestre de intercambio se pinta de otro color.</p>
@@ -40,12 +40,10 @@
 
 <dialog id="whoDlg">
   <div class="dlg">
-    <h2>¿Quién sos?</h2>
-    <p class="hint">Elegí tu nombre para editar tu fila. Si es la primera vez, anotate.</p>
-    <div class="wholist" id="whoList"></div>
-    <p class="hint warn" id="whoMsg" hidden></p>
+    <h2>¿Te anotás?</h2>
+    <p class="hint">Anotate para armar tu fila. Solo vos vas a poder editarla, desde este navegador. Las filas de los demás las podés mirar.</p>
     <div class="row">
-      <button type="button" class="primary" id="whoNew">Soy nuevo/a: anotarme</button>
+      <button type="button" class="primary" id="whoNew">Anotarme</button>
       <button type="button" id="whoLook">Solo mirar</button>
     </div>
   </div>
