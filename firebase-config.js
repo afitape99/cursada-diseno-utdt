@@ -1,11 +1,10 @@
-// Pegá acá la configuración de tu proyecto de Firebase
-// (Consola de Firebase > Configuración del proyecto > Tus apps > Web > firebaseConfig).
-// Mientras quede vacío, la página funciona en modo prueba: los cambios se guardan solo en tu navegador.
+// Configuración del proyecto de Firebase "cursada-diseno".
+// No es secreta: lo que protege los datos son las reglas de firestore.rules.
 export const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyB7SHGenrI5b5Sl_w2tFw2JxGcRAKvHsOM",
+  authDomain: "cursada-diseno.firebaseapp.com",
+  projectId: "cursada-diseno",
+  storageBucket: "cursada-diseno.firebasestorage.app",
+  messagingSenderId: "434223399473",
+  appId: "1:434223399473:web:768dd6fc2e419dbead4b10"
 };
