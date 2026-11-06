@@ -230,7 +230,7 @@ function render() {
 
   const share = {};
   for (const b of blocks) {
-    const p = personOf(b.personId); if (!p || !COLMAP[b.col]) continue;
+    const p = personOf(b.personId); if (!p || !COLMAP[b.col] || p.afuera === b.col) continue; // lo que se cursa de intercambio no se comparte
     if (b.code === "X" && /a definir/i.test(b.name || "")) continue;
     const k = b.col + "|" + keyOf(b);
     (share[k] = share[k] || { ps: [] }).ps.push(p.name);
@@ -359,7 +359,7 @@ function blockEl(b, p, mine, edit, pc, ps, share, c) {
   const info = PLAN[b.code];
   if (info) meta.appendChild(el("span", "pill", b.code));
   if (info && info[3].length === 1) meta.appendChild(el("span", "pill", `solo ${info[3][0]}C`));
-  const sh = share[b.col + "|" + keyOf(b)];
+  const sh = p.afuera === b.col ? null : share[b.col + "|" + keyOf(b)];
   if (sh && sh.ps.length > 1) {
     const others = sh.ps.filter(n => n !== p.name);
     if (others.length) meta.appendChild(el("span", "pill junt", others.join(" - ")));
