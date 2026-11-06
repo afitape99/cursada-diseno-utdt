@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cursada Diseño UTDT</title>
-<meta name="description" content="Tablero compartido para acomodar las materias de 4º y 5º año de la Licenciatura en Diseño de la UTDT.">
+<meta name="description" content="Tablero compartido para organizar la cursada de 4º y 5º año de la Licenciatura en Diseño de la UTDT.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -12,49 +12,109 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Licenciatura en Diseño · UTDT · 4º y 5º año</div>
+    <div class="eyebrow">Licenciatura en Diseño · UTDT · 2027 y 2028</div>
     <h1>Cursada 2027 y 2028</h1>
-    <p class="lede">Un tablero para toda la camada que empieza 4º año en marzo de 2027. Sumate, arrastrá cada materia al cuatrimestre que quieras y fijate con quién la cursás. Los cambios se guardan para todos.</p>
+    <p class="lede">Anotate, acomodá tus materias en los próximos cuatro cuatrimestres y mirá cómo se organizan los demás. Cada uno edita solo su fila, y todos ven todo.</p>
   </header>
 
   <div class="bar">
     <span class="status" id="status"><i></i><span>Cargando el tablero…</span></span>
     <div class="tools">
+      <span class="me" id="meLabel"></span>
+      <button type="button" id="whoBtn">Cambiar de persona</button>
       <input id="search" type="search" placeholder="Buscar persona" aria-label="Buscar persona">
-      <button type="button" class="primary" id="joinBtn">+ Sumar mi nombre</button>
     </div>
   </div>
 
   <div class="scroller"><div class="board" id="board"></div></div>
 
   <div class="help">
-    <p><strong>Mover:</strong> arrastrá el bloque dentro de tu fila. Cada materia dice con quién la cursás. También podés tocarlo y después tocar el cuatrimestre, o usar las flechas del teclado.</p>
-    <p><strong>Materias:</strong> con "+ materia" sumás las que debés o un Campo Menor. Cada materia tiene dos switches: si es optativa (cuenta como Campo Menor) y si la debés de años anteriores.</p>
-    <p><strong>Recibirse a fin de 2028:</strong> hay que dejar para el 2C 2028 una obligatoria o la última de las 3 optativas (Campos Menores).</p>
-    <p><strong>Avisos:</strong> el tablero marca materias que no se dictan en ese cuatrimestre y correlativas fuera de orden.</p>
+    <p><strong>Tu fila:</strong> arrastrá cada materia al cuatrimestre que quieras. También podés tocarla y después tocar el cuatrimestre, o usar las flechas del teclado. Las filas de los demás solo se miran.</p>
+    <p><strong>Materias:</strong> con "+ materia" sumás una del plan o una optativa. Cada materia tiene dos switches: si es optativa y si la debés de años anteriores.</p>
+    <p><strong>Recibirse a fin de 2028:</strong> hay que dejar para el 2C 2028 una obligatoria o la última de las 3 optativas.</p>
+    <p><strong>Avisos:</strong> el tablero marca materias que no se dictan en ese cuatrimestre y correlativas fuera de orden. El cuatrimestre de intercambio se pinta de otro color.</p>
   </div>
 
-  <footer>Fuente: Plan de Estudios de la Carrera de Diseño, UTDT. El plan es indicativo y los horarios salen en la oferta de cada cuatrimestre. Cualquiera con el link puede editar: no cargues datos personales.</footer>
+  <footer>Fuente: Plan de Estudios de la Carrera de Diseño, UTDT. El plan es indicativo y los horarios salen en la oferta de cada cuatrimestre. Lo que cargues lo ve cualquiera con el link: no pongas datos personales.</footer>
 </div>
 
-<dialog id="personDlg">
-  <form method="dialog" id="personForm">
-    <h2 id="personTitle">Sumarme</h2>
-    <label for="pName">Nombre o apodo</label>
-    <input id="pName" maxlength="40" required autocomplete="off">
-    <label for="pCM">Campos Menores que ya hiciste</label>
-    <select id="pCM"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
-    <label for="pAway">¿Algún cuatrimestre en otra universidad?</label>
-    <select id="pAway">
+<dialog id="whoDlg">
+  <div class="dlg">
+    <h2>¿Quién sos?</h2>
+    <p class="hint">Elegí tu nombre para editar tu fila. Si es la primera vez, anotate.</p>
+    <div class="wholist" id="whoList"></div>
+    <p class="hint warn" id="whoMsg" hidden></p>
+    <div class="row">
+      <button type="button" class="primary" id="whoNew">Soy nuevo/a: anotarme</button>
+      <button type="button" id="whoLook">Solo mirar</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="joinDlg">
+  <form method="dialog" id="joinForm">
+    <h2>Anotarme</h2>
+    <label for="jName">Nombre o apodo</label>
+    <input id="jName" maxlength="40" required autocomplete="off">
+
+    <label for="jCuatri">¿En qué cuatrimestre estás ahora?</label>
+    <select id="jCuatri">
+      <option value="2">2º año, 2do cuatrimestre</option>
+      <option value="3" selected>3º año, 2do cuatrimestre</option>
+      <option value="4">4º año, 2do cuatrimestre</option>
+    </select>
+
+    <label for="jDebe">¿Debés materias de años anteriores?</label>
+    <div class="pickrow">
+      <select id="jDebe"></select>
+      <button type="button" id="jDebeAdd">Agregar</button>
+    </div>
+    <div class="chips" id="jDebeChips"></div>
+
+    <label for="jCM">¿Cuántas optativas (Campos Menores) ya hiciste?</label>
+    <select id="jCM"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+
+    <label for="jOpt">Optativas que pensás cursar</label>
+    <div class="pickrow">
+      <input id="jOpt" maxlength="60" placeholder="Ej.: Mobiliario" autocomplete="off">
+      <button type="button" id="jOptAdd">Agregar</button>
+    </div>
+    <div class="chips" id="jOptChips"></div>
+
+    <label for="jAway">¿Te vas de intercambio algún cuatrimestre?</label>
+    <select id="jAway">
       <option value="">No</option>
       <option value="c1">1C 2027</option><option value="c2">2C 2027</option>
       <option value="c3">1C 2028</option><option value="c4">2C 2028</option>
     </select>
-    <label for="pSit">Tu situación (opcional)</label>
-    <textarea id="pSit" maxlength="300" rows="3" placeholder="Ej.: debo Economía y Marketing, quiero recibirme a fin de 2028"></textarea>
-    <p class="hint" id="personHint">Te armamos la fila con las materias de 4º año. Después sumás las que debas.</p>
+
+    <label for="jSit">Algo más sobre tu situación (opcional)</label>
+    <textarea id="jSit" maxlength="300" rows="2" placeholder="Ej.: quiero recibirme a fin de 2028"></textarea>
+    <p class="hint">Te armamos la fila con lo que te queda del plan, ubicado en el cuatrimestre que corresponde. Después la acomodás como quieras.</p>
     <div class="row">
-      <button type="submit" class="primary" id="personOk" value="ok">Sumarme</button>
+      <button type="submit" class="primary" value="ok">Anotarme</button>
+      <button type="button" id="joinCancel">Volver</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="personDlg">
+  <form method="dialog" id="personForm">
+    <h2>Editar mis datos</h2>
+    <label for="pName">Nombre o apodo</label>
+    <input id="pName" maxlength="40" required autocomplete="off">
+    <label for="pCM">Optativas (Campos Menores) que ya hiciste</label>
+    <select id="pCM"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+    <label for="pAway">Cuatrimestre de intercambio</label>
+    <select id="pAway">
+      <option value="">No me voy</option>
+      <option value="c1">1C 2027</option><option value="c2">2C 2027</option>
+      <option value="c3">1C 2028</option><option value="c4">2C 2028</option>
+    </select>
+    <label for="pSit">Situación (opcional)</label>
+    <textarea id="pSit" maxlength="300" rows="3"></textarea>
+    <div class="row">
+      <button type="submit" class="primary" value="ok">Guardar</button>
       <button type="button" id="personCancel">Cancelar</button>
     </div>
   </form>
@@ -62,18 +122,17 @@
 
 <dialog id="subjDlg">
   <form method="dialog" id="subjForm">
-    <h2>Agregar materia para <span id="subjWho"></span></h2>
+    <h2>Agregar materia</h2>
     <label for="sPlan">Del plan de estudios</label>
     <select id="sPlan"></select>
     <p class="or">o</p>
-    <label for="sFree">Otra materia (cuenta como Campo Menor)</label>
+    <label for="sFree">Una optativa (escribí el nombre)</label>
     <input id="sFree" maxlength="60" placeholder="Ej.: Mobiliario" autocomplete="off">
     <label for="sCol">Cuatrimestre</label>
     <select id="sCol">
       <option value="c1">1C 2027</option><option value="c2">2C 2027</option>
       <option value="c3">1C 2028</option><option value="c4">2C 2028</option>
     </select>
-    <p class="hint">Las de 1º a 3º año quedan marcadas como "La debe". En cada materia podés cambiar si es optativa y si la debés.</p>
     <div class="row">
       <button type="submit" class="primary" value="ok">Agregar</button>
       <button type="button" id="subjCancel">Cancelar</button>
@@ -83,8 +142,8 @@
 
 <dialog id="delDlg">
   <form method="dialog" id="delForm">
-    <h2>¿Borrar a <span id="delWho"></span>?</h2>
-    <p class="hint">Se borra la fila con todas sus materias y notas, para todos. No se puede deshacer.</p>
+    <h2>¿Borrar tu fila?</h2>
+    <p class="hint">Se borran todas tus materias y notas, para todos. No se puede deshacer.</p>
     <div class="row">
       <button type="submit" class="danger" value="ok">Sí, borrar</button>
       <button type="button" id="delCancel">Cancelar</button>

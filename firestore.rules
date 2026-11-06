@@ -1,39 +1,56 @@
 rules_version = '2';
-// Cualquiera puede leer y editar, sin cuenta. Se limita el tamaño y la forma de cada documento
-// para que nadie pueda llenar la base con basura.
+// Todos leen todo. Cada persona edita solo su fila: la fila guarda el id anónimo (ownerUid)
+// del navegador que la creó o la reclamó. Las filas sin dueño (las de ejemplo) las reclama el primero que las elige.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function signedIn() { return request.auth != null; }
+
+    function validPerson(d) {
+      return d.keys().hasOnly(['name', 'cuatri', 'cmDone', 'situacion', 'afuera', 'ownerUid', 'createdAt'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 40
+        && d.cmDone is int && d.cmDone >= 0 && d.cmDone <= 3
+        && (!('cuatri' in d) || (d.cuatri is int && d.cuatri >= 1 && d.cuatri <= 5))
+        && (!('situacion' in d) || (d.situacion is string && d.situacion.size() <= 300))
+        && (!('afuera' in d) || d.afuera in ['', 'c1', 'c2', 'c3', 'c4']);
+    }
+
+    // la fila es de quien la tiene a su nombre, o de nadie todavía
+    function canWritePerson(pid) {
+      let p = getAfter(/databases/$(database)/documents/people/$(pid)).data;
+      return !('ownerUid' in p) || p.ownerUid == request.auth.uid;
+    }
+
     match /people/{id} {
       allow read: if true;
-      allow delete: if true;
-      allow create, update: if request.resource.data.keys().hasOnly(['name', 'cmDone', 'situacion', 'afuera', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 40
-        && request.resource.data.cmDone is int
-        && request.resource.data.cmDone >= 0
-        && request.resource.data.cmDone <= 3
-        && (!('situacion' in request.resource.data) || (request.resource.data.situacion is string && request.resource.data.situacion.size() <= 300))
-        && (!('afuera' in request.resource.data) || (request.resource.data.afuera is string && request.resource.data.afuera.size() <= 10));
+      allow create: if signedIn() && validPerson(request.resource.data)
+        && (request.resource.data.ownerUid == request.auth.uid
+            || (!('ownerUid' in request.resource.data) && id in ['sofi', 'dino', 'bale']));
+      allow update: if signedIn() && validPerson(request.resource.data)
+        && request.resource.data.ownerUid == request.auth.uid
+        && (!('ownerUid' in resource.data) || resource.data.ownerUid == request.auth.uid);
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
     match /blocks/{id} {
       allow read: if true;
-      allow delete: if true;
-      allow create, update: if request.resource.data.keys().hasOnly(['personId', 'code', 'name', 'col', 'note', 'debe', 'opt'])
-        && request.resource.data.personId is string
-        && request.resource.data.personId.size() <= 40
-        && request.resource.data.code is string
-        && request.resource.data.code.size() <= 10
+      allow create, update: if signedIn()
+        && request.resource.data.keys().hasOnly(['personId', 'code', 'name', 'col', 'note', 'debe', 'opt'])
+        && request.resource.data.personId is string && request.resource.data.personId.size() <= 40
+        && request.resource.data.code is string && request.resource.data.code.size() <= 10
         && request.resource.data.col in ['c1', 'c2', 'c3', 'c4']
         && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() <= 60))
-        && (!('note' in request.resource.data) || (request.resource.data.note is string && request.resource.data.note.size() <= 300));
+        && (!('note' in request.resource.data) || (request.resource.data.note is string && request.resource.data.note.size() <= 300))
+        && (resource == null || resource.data.personId == request.resource.data.personId)
+        && canWritePerson(request.resource.data.personId);
+      allow delete: if signedIn()
+        && (!exists(/databases/$(database)/documents/people/$(resource.data.personId))
+            || get(/databases/$(database)/documents/people/$(resource.data.personId)).data.ownerUid == request.auth.uid);
     }
 
     match /meta/{id} {
       allow read: if true;
-      allow write: if request.resource.data.keys().hasOnly(['seeded']);
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['seeded']);
     }
   }
 }

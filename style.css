@@ -11,6 +11,7 @@
   --warn: #9a6a00;
   --warn-bg: #fdf3d6;
   --away: #c2551c;
+  --away-bg: #fbeee3;
   --drop: #cfe6d1;
   --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
   --f-body: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
@@ -20,7 +21,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #121713; --surface: #1a211c; --cell: #161c18; --fg: #e6ece6; --muted: #9aa89d; --line: #2c372f;
-    --accent: #5cc068; --accent-soft: #1f3423; --warn: #f0c45a; --warn-bg: #3a3016; --away: #ec8a55; --drop: #24402a;
+    --accent: #5cc068; --accent-soft: #1f3423; --warn: #f0c45a; --warn-bg: #3a3016; --away: #ec8a55; --away-bg: #2e2016; --drop: #24402a;
     color-scheme: dark;
   }
 }
@@ -60,8 +61,8 @@ button.danger { color: var(--away); border-color: var(--away); }
 .hd { padding: 12px 12px 10px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 2; }
 .hd b { font-family: var(--f-display); font-size: 17px; display: block; }
 .hd span { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
-.hd.year4 { box-shadow: inset 0 3px 0 var(--fg); }
-.hd.year5 { box-shadow: inset 0 3px 0 var(--muted); }
+.hd.y1 { box-shadow: inset 0 3px 0 var(--fg); }
+.hd.y2 { box-shadow: inset 0 3px 0 var(--muted); }
 
 .who { padding: 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .who .top { display: flex; align-items: center; gap: 8px; }
@@ -102,8 +103,8 @@ button.danger { color: var(--away); border-color: var(--away); }
 .blk.lifted { opacity: .35; }
 .blk .x { position: absolute; top: 3px; right: 4px; border: 0; background: none; padding: 0 4px; font-size: 15px; line-height: 1; color: var(--muted); }
 .note { font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--cell); border-radius: 5px; padding: 3px 6px; cursor: text; }
-.addnote { justify-self: start; border: 0; background: none; padding: 0; font-size: 11px; color: var(--muted); }
-.addnote:hover { color: var(--fg); }
+.addnote { justify-self: stretch; text-align: left; border: 1px dashed var(--line); background: var(--surface); border-radius: 6px; padding: 3px 7px; font-size: 11.5px; color: var(--muted); }
+.addnote:hover { color: var(--fg); border-color: var(--pc); }
 .noteedit { display: grid; gap: 4px; }
 .noteedit textarea { font-size: 12px; padding: 4px 6px; resize: vertical; min-height: 46px; width: 100%; border-radius: 6px; }
 .noteedit div { display: flex; gap: 6px; }
@@ -156,3 +157,27 @@ dialog .row { display: flex; gap: 8px; margin-top: 10px; }
 }
 .addrow .addlabel { font-family: var(--f-display); font-weight: 700; font-size: 15px; }
 .addrow input { width: 220px; }
+
+/* quién sos, permisos, intercambio */
+.me { font-weight: 600; font-size: 13px; }
+.blk { cursor: default; }
+.blk.can { cursor: grab; }
+.cell.away { background: var(--away-bg); box-shadow: inset 0 0 0 2px var(--away); }
+.away-note { font-weight: 600; }
+.away-tag { font-family: var(--f-mono); font-size: 10.5px; color: var(--away); }
+.who.mine { background: var(--accent-soft); }
+.who .you { font-family: var(--f-mono); font-size: 10.5px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+.bn.rename { border: 0; background: none; padding: 0 16px 0 0; text-align: left; cursor: text; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; font: inherit; font-weight: 600; font-size: 13px; line-height: 1.25; }
+.noteedit input { font-size: 12.5px; padding: 4px 6px; width: 100%; border-radius: 6px; }
+.dlg { display: grid; gap: 8px; padding: 20px; }
+.wholist { display: grid; gap: 6px; max-height: 50vh; overflow-y: auto; }
+.whoitem { display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 10px; }
+.whoitem .tag { width: 26px; height: 26px; font-size: 13px; }
+.whoitem small { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 400; }
+.hint.warn { color: var(--warn); }
+.pickrow { display: flex; gap: 6px; }
+.pickrow select, .pickrow input { flex: 1; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; background: var(--accent-soft); border-radius: 999px; padding: 2px 4px 2px 10px; }
+.chip button { border: 0; background: none; padding: 0 6px; font-size: 14px; line-height: 1; color: var(--muted); }
+dialog { max-height: 92vh; overflow-y: auto; }

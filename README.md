@@ -2,12 +2,11 @@
 
 Tablero compartido para que la camada que empieza 4º año de la Licenciatura en Diseño de la UTDT en marzo de 2027 acomode sus materias de 4º y 5º año.
 
-- Cada persona se suma con su nombre, sus Campos Menores hechos y su situación.
-- Cada materia es un bloque que se arrastra entre 1C 2027, 2C 2027, 1C 2028 y 2C 2028.
-- Cada bloque tiene una nota y dos switches: optativa u obligatoria, y si se debe de años anteriores.
+- Al entrar te pregunta quién sos. Si es la primera vez, te anotás: en qué cuatrimestre estás, qué materias debés (de un desplegable), cuántas optativas hiciste, cuáles pensás cursar (las escribís) y si te vas de intercambio.
+- Cada persona edita solo su fila y ve la de todos. No hace falta cuenta: la fila queda atada al navegador donde te anotaste.
+- Cada materia es un bloque que se arrastra entre 1C 2027, 2C 2027, 1C 2028 y 2C 2028, con una nota y dos switches: optativa u obligatoria, y si se debe de años anteriores.
 - Avisa si una materia no se dicta en ese cuatrimestre, si una correlativa queda fuera de orden y si alguien no deja nada para el 2C 2028 (requisito para recibirse a fin de 2028).
-- Muestra quiénes cursan juntos cada materia.
-- Cualquiera con el link puede editar, sin cuenta, y los cambios se ven al momento.
+- El cuatrimestre de intercambio se pinta de otro color y cada materia muestra con quién la compartís.
 
 ## Cómo está hecho
 
@@ -20,15 +19,16 @@ Sin configurar Firebase, la página funciona en **modo prueba**: los cambios que
 1. Entrá a https://console.firebase.google.com con una cuenta de Google y creá un proyecto (Google Analytics no hace falta).
 2. En el menú, **Compilación > Firestore Database > Crear base de datos**. Elegí una ubicación (por ejemplo `southamerica-east1`) y empezá en **modo producción**.
 3. En la pestaña **Reglas** de Firestore, pegá el contenido de [`firestore.rules`](firestore.rules) y tocá **Publicar**.
-4. En **Configuración del proyecto** (el engranaje) > **Tus apps**, agregá una app **Web** (`</>`). No hace falta Firebase Hosting.
-5. Copiá el objeto `firebaseConfig` que te muestra y pegalo en [`firebase-config.js`](firebase-config.js).
-6. Subí el cambio. Al abrir la página por primera vez se cargan las filas de Sofi, Dino y Bale.
+4. En **Compilación > Authentication > Comenzar > Método de acceso**, activá **Anónimo**. Es lo que permite que cada uno edite solo su fila sin crear una cuenta.
+5. En **Configuración del proyecto** (el engranaje) > **Tus apps**, agregá una app **Web** (`</>`). No hace falta Firebase Hosting.
+6. Copiá el objeto `firebaseConfig` que te muestra y pegalo en [`firebase-config.js`](firebase-config.js).
+7. Subí el cambio. Al abrir la página por primera vez se cargan las filas de Sofi, Dino y Bale, sin dueño: cada una reclama la suya eligiéndola en "¿Quién sos?".
 
 La `apiKey` de Firebase no es secreta: identifica el proyecto y lo que protege los datos son las reglas de `firestore.rules`.
 
 ## Cuidado
 
-Como cualquiera puede editar, cualquiera también puede borrar. No hay historial de cambios. No cargues datos personales sensibles.
+Cada fila se edita solo desde el navegador donde se creó o reclamó. Si borrás los datos del navegador o cambiás de compu, tu fila queda de solo lectura. No hay historial de cambios. Lo que cargues lo ve cualquiera con el link: no pongas datos personales sensibles.
 
 ## Probar en tu compu
 
