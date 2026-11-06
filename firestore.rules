@@ -1,0 +1,39 @@
+rules_version = '2';
+// Cualquiera puede leer y editar, sin cuenta. Se limita el tamaño y la forma de cada documento
+// para que nadie pueda llenar la base con basura.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /people/{id} {
+      allow read: if true;
+      allow delete: if true;
+      allow create, update: if request.resource.data.keys().hasOnly(['name', 'cmDone', 'situacion', 'afuera', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 40
+        && request.resource.data.cmDone is int
+        && request.resource.data.cmDone >= 0
+        && request.resource.data.cmDone <= 3
+        && (!('situacion' in request.resource.data) || (request.resource.data.situacion is string && request.resource.data.situacion.size() <= 300))
+        && (!('afuera' in request.resource.data) || (request.resource.data.afuera is string && request.resource.data.afuera.size() <= 10));
+    }
+
+    match /blocks/{id} {
+      allow read: if true;
+      allow delete: if true;
+      allow create, update: if request.resource.data.keys().hasOnly(['personId', 'code', 'name', 'col', 'note', 'debe', 'opt'])
+        && request.resource.data.personId is string
+        && request.resource.data.personId.size() <= 40
+        && request.resource.data.code is string
+        && request.resource.data.code.size() <= 10
+        && request.resource.data.col in ['c1', 'c2', 'c3', 'c4']
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() <= 60))
+        && (!('note' in request.resource.data) || (request.resource.data.note is string && request.resource.data.note.size() <= 300));
+    }
+
+    match /meta/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['seeded']);
+    }
+  }
+}

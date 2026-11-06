@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cursada Diseño UTDT</title>
+<meta name="description" content="Tablero compartido para acomodar las materias de 4º y 5º año de la Licenciatura en Diseño de la UTDT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Licenciatura en Diseño · UTDT · 4º y 5º año</div>
+    <h1>Cursada 2027 y 2028</h1>
+    <p class="lede">Un tablero para toda la camada que empieza 4º año en marzo de 2027. Sumate, arrastrá cada materia al cuatrimestre que quieras y fijate con quién la cursás. Los cambios se guardan para todos.</p>
+  </header>
+
+  <div class="bar">
+    <span class="status" id="status"><i></i><span>Cargando el tablero…</span></span>
+    <div class="tools">
+      <input id="search" type="search" placeholder="Buscar persona" aria-label="Buscar persona">
+      <button type="button" class="primary" id="joinBtn">Sumarme</button>
+    </div>
+  </div>
+
+  <div class="scroller"><div class="board" id="board"></div></div>
+
+  <div class="help">
+    <p><strong>Mover:</strong> arrastrá el bloque dentro de tu fila. También podés tocarlo y después tocar el cuatrimestre, o usar las flechas del teclado.</p>
+    <p><strong>Materias:</strong> con "+ materia" sumás las que debés o un Campo Menor. Cada materia tiene dos switches: si es optativa (cuenta como Campo Menor) y si la debés de años anteriores.</p>
+    <p><strong>Recibirse a fin de 2028:</strong> hay que dejar para el 2C 2028 una obligatoria o la última de las 3 optativas (Campos Menores).</p>
+    <p><strong>Avisos:</strong> el tablero marca materias que no se dictan en ese cuatrimestre y correlativas fuera de orden.</p>
+  </div>
+
+  <footer>Fuente: Plan de Estudios de la Carrera de Diseño, UTDT. El plan es indicativo y los horarios salen en la oferta de cada cuatrimestre. Cualquiera con el link puede editar: no cargues datos personales.</footer>
+</div>
+
+<dialog id="personDlg">
+  <form method="dialog" id="personForm">
+    <h2 id="personTitle">Sumarme</h2>
+    <label for="pName">Nombre o apodo</label>
+    <input id="pName" maxlength="40" required autocomplete="off">
+    <label for="pCM">Campos Menores que ya hiciste</label>
+    <select id="pCM"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+    <label for="pAway">¿Algún cuatrimestre en otra universidad?</label>
+    <select id="pAway">
+      <option value="">No</option>
+      <option value="c1">1C 2027</option><option value="c2">2C 2027</option>
+      <option value="c3">1C 2028</option><option value="c4">2C 2028</option>
+    </select>
+    <label for="pSit">Tu situación (opcional)</label>
+    <textarea id="pSit" maxlength="300" rows="3" placeholder="Ej.: debo Economía y Marketing, quiero recibirme a fin de 2028"></textarea>
+    <p class="hint" id="personHint">Te armamos la fila con las materias de 4º año. Después sumás las que debas.</p>
+    <div class="row">
+      <button type="submit" class="primary" id="personOk" value="ok">Sumarme</button>
+      <button type="button" id="personCancel">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="subjDlg">
+  <form method="dialog" id="subjForm">
+    <h2>Agregar materia para <span id="subjWho"></span></h2>
+    <label for="sPlan">Del plan de estudios</label>
+    <select id="sPlan"></select>
+    <p class="or">o</p>
+    <label for="sFree">Otra materia (cuenta como Campo Menor)</label>
+    <input id="sFree" maxlength="60" placeholder="Ej.: Mobiliario" autocomplete="off">
+    <label for="sCol">Cuatrimestre</label>
+    <select id="sCol">
+      <option value="c1">1C 2027</option><option value="c2">2C 2027</option>
+      <option value="c3">1C 2028</option><option value="c4">2C 2028</option>
+    </select>
+    <p class="hint">Las de 1º a 3º año quedan marcadas como "La debe". En cada materia podés cambiar si es optativa y si la debés.</p>
+    <div class="row">
+      <button type="submit" class="primary" value="ok">Agregar</button>
+      <button type="button" id="subjCancel">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="delDlg">
+  <form method="dialog" id="delForm">
+    <h2>¿Borrar a <span id="delWho"></span>?</h2>
+    <p class="hint">Se borra la fila con todas sus materias y notas, para todos. No se puede deshacer.</p>
+    <div class="row">
+      <button type="submit" class="danger" value="ok">Sí, borrar</button>
+      <button type="button" id="delCancel">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
