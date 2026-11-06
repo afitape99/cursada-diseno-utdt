@@ -394,7 +394,7 @@ function blockEl(b, p, mine, edit, pc, ps, share, c) {
     if (edit) { nt.dataset.act = "edit"; nt.title = "Editar nota"; }
     blk.appendChild(nt);
   } else if (edit) {
-    const an = el("button", "addnote note-ui", "+ Anotar algo (horario, profe, comisión)"); an.type = "button"; an.dataset.act = "edit";
+    const an = el("button", "addnote note-ui", "Agregar nota"); an.type = "button"; an.dataset.act = "edit";
     blk.appendChild(an);
   }
 
