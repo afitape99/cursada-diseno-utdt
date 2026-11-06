@@ -148,3 +148,11 @@ dialog .row { display: flex; gap: 8px; margin-top: 10px; }
 .sw[aria-checked="true"] { color: var(--fg); }
 .sw[aria-checked="true"]::before { background-color: var(--pc); background-position: 10px 0; }
 @media (prefers-reduced-motion: reduce) { .sw::before { transition: none; } }
+
+/* fila para sumarse */
+.addrow {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 14px 12px; border-bottom: 1px solid var(--line); background: var(--accent-soft);
+}
+.addrow .addlabel { font-family: var(--f-display); font-weight: 700; font-size: 15px; }
+.addrow input { width: 220px; }

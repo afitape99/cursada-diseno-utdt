@@ -187,6 +187,7 @@ let people = [], blocks = [];
 let pendingRemote = null;
 let selected = null, dragging = null, editing = null, editDraft = "";
 let search = "";
+let quickDraft = "", quickCM = "0";
 let editPersonId = null, subjPersonId = null, delPersonId = null;
 
 const $ = id => document.getElementById(id);
@@ -236,6 +237,7 @@ function warningsFor(b, mine, person) {
 
 // ---------- Dibujo ----------
 function render() {
+  const focusId = document.activeElement && document.activeElement.id;
   const visible = people
     .filter(p => !search || p.name.toLowerCase().includes(search))
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
@@ -370,6 +372,23 @@ function render() {
     }
   }
 
+  // fila para que alguien nuevo se sume sin buscar el botón
+  const add = el("form", "addrow");
+  add.id = "addRow";
+  add.appendChild(el("span", "addlabel", "¿No estás? Sumá tu nombre:"));
+  const nm = el("input"); nm.id = "quickName"; nm.maxLength = 40; nm.placeholder = "Tu nombre o apodo";
+  nm.setAttribute("aria-label", "Tu nombre o apodo"); nm.autocomplete = "off"; nm.value = quickDraft;
+  const cm = el("select"); cm.id = "quickCM"; cm.setAttribute("aria-label", "Campos Menores que ya hiciste");
+  for (let i = 0; i <= CM_TOTAL; i++) cm.appendChild(new Option(`${i} Campo${i === 1 ? "" : "s"} Menor${i === 1 ? "" : "es"} hecho${i === 1 ? "" : "s"}`, String(i)));
+  cm.value = quickCM;
+  const go = el("button", "primary", "Agregarme"); go.type = "submit";
+  add.append(nm, cm, go);
+  boardEl.appendChild(add);
+  if (focusId === "quickName" || focusId === "quickCM") {
+    const f = $(focusId); f.focus();
+    if (focusId === "quickName") f.setSelectionRange(f.value.length, f.value.length);
+  }
+
   const foot = el("div", "foot");
   foot.appendChild(el("div", "jl lead"));
   const tl = el("div", "jl"); tl.appendChild(el("b", null, "Cursan juntos")); foot.appendChild(tl);
@@ -466,7 +485,20 @@ window.addEventListener("pointercancel", () => {
   flushRemote();
 });
 
-boardEl.addEventListener("input", ev => { if (ev.target.tagName === "TEXTAREA") editDraft = ev.target.value; });
+boardEl.addEventListener("input", ev => {
+  if (ev.target.tagName === "TEXTAREA") editDraft = ev.target.value;
+  if (ev.target.id === "quickName") quickDraft = ev.target.value;
+});
+boardEl.addEventListener("change", ev => { if (ev.target.id === "quickCM") quickCM = ev.target.value; });
+boardEl.addEventListener("submit", ev => {
+  if (ev.target.id !== "addRow") return;
+  ev.preventDefault();
+  const name = quickDraft.trim().slice(0, 40);
+  if (!name) { $("quickName").focus(); return; }
+  const cmDone = Number(quickCM);
+  quickDraft = ""; quickCM = "0"; search = ""; $("search").value = "";
+  store.addPerson(store.newId(), { name, cmDone, afuera: "", situacion: "", createdAt: Date.now() }, standardBlocks(cmDone)).catch(fail);
+});
 
 boardEl.addEventListener("click", ev => {
   const pact = ev.target.closest("[data-pact]");
